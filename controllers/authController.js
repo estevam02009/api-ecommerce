@@ -34,3 +34,29 @@ exports.regsiterUser = async (req, res) => {
 };
 
 // Login de usuário
+exports.loginUser = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Email ou senha inválidos.' });
+        }
+
+        const isMatch = await user.matchPassword(senha);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Email ou senha inválidos.' });
+        }
+
+        res.json({
+            _id: user._id,
+            nome: user.nome,
+            email: user.email,
+            role: user.role,
+            token: generateToken(user._id, user.role)
+        });
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: "Erro no servidor ao fazer Login." })
+    }
+}
